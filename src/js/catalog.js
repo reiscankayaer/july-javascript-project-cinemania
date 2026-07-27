@@ -1,8 +1,8 @@
-
 import { initGlobalUi } from './main.js';
 import { initHeader } from './header.js';
 import { initHero } from './hero.js';
 import {
+  getTrending,
   getTrendingPaged,
   searchMovies,
   convertGenreIdsToNames,
@@ -20,12 +20,9 @@ let searchInput;
 let clearBtn;
 let yearSelect;
 
-
 document.addEventListener('DOMContentLoaded', () => {
- 
   initHero();
 
-  
   const searchInput = document.getElementById('searchInput');
   const yearSelectWrapper = document.getElementById('yearSelectWrapper');
   const searchForm = document.getElementById('searchForm');
@@ -90,24 +87,26 @@ document.addEventListener('DOMContentLoaded', () => {
   sayfaBaslangiciniYukle();
 
   // FORM SUBMIT (ARAMA BAŞLANGICI)
-  searchForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    currentQuery = searchInput.value.trim();
-    currentSelectedYear =
-      customSelectLabel.textContent === 'Year'
-        ? ''
-        : customSelectLabel.textContent;
+  if (searchForm) {
+    searchForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      currentQuery = searchInput.value.trim();
+      currentSelectedYear =
+        customSelectLabel.textContent === 'Year'
+          ? ''
+          : customSelectLabel.textContent;
 
-    if (!currentQuery) {
-      moviesListBlock.innerHTML = `<div class="catalog-error-message"><p>Please enter a movie title to search.</p></div>`;
-      if (paginationWrapper) paginationWrapper.style.display = 'none';
-      return;
-    }
+      if (!currentQuery) {
+        moviesListBlock.innerHTML = `<div class="catalog-error-message"><p>Please enter a movie title to search.</p></div>`;
+        if (paginationWrapper) paginationWrapper.style.display = 'none';
+        return;
+      }
 
-    isSearchingMode = true;
-    currentPage = 1;
-    await porsiyonUcur();
-  });
+      isSearchingMode = true;
+      currentPage = 1;
+      await porsiyonUcur();
+    });
+  }
 
   // SUNUCUDAN PORSIYON ÇEKEN ANA FONKSİYON
   async function porsiyonUcur() {
@@ -188,18 +187,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  prevPageBtn.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      porsiyonUcur();
-    }
-  });
-  nextPageBtn.addEventListener('click', () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      porsiyonUcur();
-    }
-  });
+  if (prevPageBtn) {
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        porsiyonUcur();
+      }
+    });
+  }
+
+  if (nextPageBtn) {
+    nextPageBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        porsiyonUcur();
+      }
+    });
+  }
 
   // FILM KARTLARINI BASMA FONKSİYONU (DİNAMİK TÜRLER ENTEGRELİ)
   async function filmKartlariniGoster(filmler, appendMode = false) {
@@ -247,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // YIL ÇARK SİSTEMİNİN ÇALIŞMA DÖNGÜLERİ
   function yillariDoldur() {
+    if (!yearMenu) return;
     const mevcutYil = new Date().getFullYear();
     const baslangicYili = 1900;
 
@@ -263,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   yillariDoldur();
 
   function merkezElemaniniBul() {
-    if (options.length === 0) return;
+    if (options.length === 0 || !yearMenu) return;
     const menuRect = yearMenu.getBoundingClientRect();
     const menuCenter = menuRect.top + menuRect.height / 2;
     let enYakinEleman = options[0];
@@ -286,22 +291,27 @@ document.addEventListener('DOMContentLoaded', () => {
     activeIndex = bulunanIndex;
   }
 
-  yearMenu.addEventListener('scroll', merkezElemaniniBul);
+  if (yearMenu) {
+    yearMenu.addEventListener('scroll', merkezElemaniniBul);
+  }
 
-  customSelectTrigger.addEventListener('click', e => {
-    e.stopPropagation();
-    const isHidden = yearMenu.classList.toggle('hide');
-    if (!isHidden) {
-      customSelectTrigger.classList.add('is-open');
-      setTimeout(() => {
-        merkezdekiElemanaKaydir();
-      }, 50);
-    } else {
-      menuKapat();
-    }
-  });
+  if (customSelectTrigger) {
+    customSelectTrigger.addEventListener('click', e => {
+      e.stopPropagation();
+      const isHidden = yearMenu.classList.toggle('hide');
+      if (!isHidden) {
+        customSelectTrigger.classList.add('is-open');
+        setTimeout(() => {
+          merkezdekiElemanaKaydir();
+        }, 50);
+      } else {
+        menuKapat();
+      }
+    });
+  }
 
   function menuKapat() {
+    if (!yearMenu || !customSelectTrigger) return;
     yearMenu.classList.add('hide');
     customSelectTrigger.classList.remove('is-open');
     if (options[activeIndex]) {
@@ -320,108 +330,107 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  yearMenu.addEventListener('click', e => {
-    if (e.target.classList.contains('custom-select__option')) {
-      const idx = options.indexOf(e.target);
-      if (idx !== -1) {
-        activeIndex = idx;
-        merkezdekiElemanaKaydir();
-        setTimeout(menuKapat, 300);
+  if (yearMenu) {
+    yearMenu.addEventListener('click', e => {
+      if (e.target.classList.contains('custom-select__option')) {
+        const idx = options.indexOf(e.target);
+        if (idx !== -1) {
+          activeIndex = idx;
+          merkezdekiElemanaKaydir();
+          setTimeout(menuKapat, 300);
+        }
       }
-    }
-  });
+    });
+  }
 
-  customSelectTrigger.addEventListener('keydown', e => {
-    if (yearMenu.classList.contains('hide')) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+  if (customSelectTrigger) {
+    customSelectTrigger.addEventListener('keydown', e => {
+      if (yearMenu.classList.contains('hide')) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+          e.preventDefault();
+          customSelectTrigger.click();
+          return;
+        }
+      }
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
-        customSelectTrigger.click();
-        return;
+        if (activeIndex < options.length - 1) {
+          activeIndex++;
+          merkezdekiElemanaKaydir();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (activeIndex > 0) {
+          activeIndex--;
+          merkezdekiElemanaKaydir();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        menuKapat();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        yearMenu.classList.add('hide');
+        customSelectTrigger.classList.remove('is-open');
       }
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (activeIndex < options.length - 1) {
-        activeIndex++;
-        merkezdekiElemanaKaydir();
-      }
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (activeIndex > 0) {
-        activeIndex--;
-        merkezdekiElemanaKaydir();
-      }
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      menuKapat();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      yearMenu.classList.add('hide');
-      customSelectTrigger.classList.remove('is-open');
-    }
-  });
+    });
+  }
 
   document.addEventListener('click', menuKapat);
-  // INPUT VE TEMİZLEME YÖNETİMİ (MOBİL DUYARLI SATIR VE ÇARPI KONTROLLERİ)
-  searchInput.addEventListener('input', e => {
-    const value = e.target.value.trim();
-    const searchClone = document.getElementById('searchClone');
 
-    if (value.length > 0) {
-      if (window.innerWidth < 1200) {
-        // MOBİL DURUMU
-        if (mobileCloneBox) mobileCloneBox.classList.add('is-active');
-        if (yearSelectWrapper) yearSelectWrapper.classList.add('is-visible');
-        if (searchClone) searchClone.value = value;
-        if (clearBtnMobile) clearBtnMobile.style.display = 'block';
-        if (clearBtnDesktop) clearBtnDesktop.style.display = 'none';
+  // INPUT VE TEMİZLEME YÖNETİMİ
+  if (searchInput) {
+    searchInput.addEventListener('input', e => {
+      const value = e.target.value.trim();
+      const searchClone = document.getElementById('searchClone');
+
+      if (value.length > 0) {
+        if (window.innerWidth < 1200) {
+          if (mobileCloneBox) mobileCloneBox.classList.add('is-active');
+          if (yearSelectWrapper) yearSelectWrapper.classList.add('is-visible');
+          if (searchClone) searchClone.value = value;
+          if (clearBtnMobile) clearBtnMobile.style.display = 'block';
+          if (clearBtnDesktop) clearBtnDesktop.style.display = 'none';
+        } else {
+          if (mobileCloneBox) mobileCloneBox.classList.remove('is-active');
+          if (yearSelectWrapper) yearSelectWrapper.classList.add('is-visible');
+          if (clearBtnDesktop) clearBtnDesktop.style.display = 'block';
+          if (clearBtnMobile) clearBtnMobile.style.display = 'none';
+        }
+
+        if (yearMenu) {
+          yearMenu.classList.add('hide');
+        }
       } else {
-        // MASAÜSTÜ DURUMU
-        if (mobileCloneBox) mobileCloneBox.classList.remove('is-active');
-        if (yearSelectWrapper) yearSelectWrapper.classList.add('is-visible');
-        if (clearBtnDesktop) clearBtnDesktop.style.display = 'block';
-        if (clearBtnMobile) clearBtnMobile.style.display = 'none';
+        sıfırlaVeTemizle();
       }
-
-      // 🔥 KESİN ÇÖZÜM: Giriş yapıldığında liste kutusunun gizli kalmasını (hide) garanti ediyoruz.
-      // Sadece kullanıcı "Year" butonuna kendi eliyle tıkladığında açılacak.
-      if (yearMenu) {
-        yearMenu.classList.add('hide');
-      }
-    } else {
-      sıfırlaVeTemizle();
-    }
-  });
+    });
+  }
 
   function sıfırlaVeTemizle() {
-    searchInput.value = '';
+    if (searchInput) searchInput.value = '';
     if (clearBtnDesktop) clearBtnDesktop.style.display = 'none';
     if (clearBtnMobile) clearBtnMobile.style.display = 'none';
     if (mobileCloneBox) mobileCloneBox.classList.remove('is-active');
     if (yearSelectWrapper) yearSelectWrapper.classList.remove('is-visible');
-    if (yearMenu) yearMenu.classList.add('hide'); // Sıfırlanınca listeyi kapat
+    if (yearMenu) yearMenu.classList.add('hide');
     if (customSelectTrigger) customSelectTrigger.classList.remove('is-open');
-    customSelectLabel.textContent = 'Year';
+    if (customSelectLabel) customSelectLabel.textContent = 'Year';
     activeIndex = 0;
   }
 
-<<<<<<< HEAD
-  if (movieGrid) {
-    movieGrid.addEventListener('click', e => {
-      const card = e.target.closest('.movie-card');
-      if (!card) return;
-=======
-  if (clearBtnDesktop)
+  if (clearBtnDesktop) {
     clearBtnDesktop.addEventListener('click', () => {
       sıfırlaVeTemizle();
-      searchInput.focus();
+      if (searchInput) searchInput.focus();
       sayfaBaslangiciniYukle();
     });
-  if (clearBtnMobile)
+  }
+
+  if (clearBtnMobile) {
     clearBtnMobile.addEventListener('click', () => {
       sıfırlaVeTemizle();
-      searchInput.focus();
+      if (searchInput) searchInput.focus();
       sayfaBaslangiciniYukle();
->>>>>>> dcd7918739c720638fbf4b6848a98de25c988bb6
     });
+  }
 });
