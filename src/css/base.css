@@ -582,3 +582,33 @@ body.light-theme .btn--secondary:hover {
 body.light-theme ::-webkit-scrollbar-track {
   background: var(--surface-white-soft);
 }
+/* Film Modalı Arka Plan ve Ortalama Ayarı */
+.spotlight-overlay {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85); /* Arkadaki siteyi karartır */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* En üstte görünmesini sağlar */
+}
+
+/* Modal Gizliyken Ekranda Yer Kaplamaması İçin */
+.spotlight-overlay.hidden {
+  display: none !important;
+}
+
+/* İçeriğin Kutusu (Gerekirse diye ufak bir dokunuş) */
+.spotlight-shell {
+  background-color: #111111;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0px 0px 20px rgba(255, 107, 0, 0.3); /* Turuncu hafif bir parlama */
+}

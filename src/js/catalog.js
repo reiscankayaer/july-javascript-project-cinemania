@@ -1,11 +1,16 @@
+import { initGlobalUi } from './main.js';
 import { initHeader } from './header.js';
 import { initHero } from './hero.js';
-i
 import {
   getTrendingPaged,
   searchMovies,
   convertGenreIdsToNames,
 } from './api.js';
+
+const generateStarIconsMarkup = (rating, className) => {
+  return `<span class="${className}" style="color:orange;">★</span>`;
+};
+
 let movieGrid;
 let oopsMessage;
 let pagination;
@@ -314,7 +319,6 @@ async function bootstrapCatalogPage() {
     movieGrid.addEventListener('click', e => {
       const card = e.target.closest('.movie-card');
       if (!card) return;
-      showMovieSpotlight(card.dataset.id);
     });
   }
 

@@ -1,11 +1,37 @@
 import { getTrending, getUpcoming, getMovieDetails } from './api.js';
+import { openMovieModal, initGlobalUi } from './main.js';
+import { initHeader } from './header.js';
+import { initHero } from './hero.js';
+
+const LIBRARY_KEY = 'my-library-movies';
+
+const getLibraryMovies = () => {
+  const savedMovies = localStorage.getItem(LIBRARY_KEY);
+  return savedMovies ? JSON.parse(savedMovies) : [];
+};
+
+const isMovieSaved = movieId => {
+  const movies = getLibraryMovies();
+  return movies.some(movie => movie.id === movieId);
+};
+
+const saveMovieToLibrary = movie => {
+  const movies = getLibraryMovies();
+  if (!movies.some(m => m.id === movie.id)) {
+    movies.push(movie);
+    localStorage.setItem(LIBRARY_KEY, JSON.stringify(movies));
+  }
+};
+
+const removeMovieFromLibrary = movieId => {
+  let movies = getLibraryMovies();
+  movies = movies.filter(movie => movie.id !== movieId);
+  localStorage.setItem(LIBRARY_KEY, JSON.stringify(movies));
+};
 
 const showGlobalLoader = () => console.log('Yükleniyor...');
 const hideGlobalLoader = () => console.log('Yükleme bitti.');
 const generateStarIconsMarkup = () => '<span style="color:orange;">★</span>';
-const isMovieSaved = () => false;
-const saveMovieToLibrary = () => {};
-const removeMovieFromLibrary = () => {};
 
 const weeklyList = document.getElementById('weeklyList');
 const upcomingWrapper = document.getElementById('upcomingWrapper');
@@ -65,7 +91,7 @@ async function renderWeeklyTrends() {
   const cardElements = weeklyList.querySelectorAll('.movie-card');
   cardElements.forEach((card, index) => {
     card.addEventListener('click', () => {
-      console.log('Seçilen Film:', movies[index]);
+      openMovieModal(movies[index]);
     });
   });
 }
@@ -111,6 +137,7 @@ async function renderUpcoming() {
   `;
 
   const addBtn = document.getElementById('upcomingAddBtn');
+
   const updateBtnState = () => {
     const isSaved = isMovieSaved(movie.id);
     if (isSaved) {
@@ -132,4 +159,23 @@ async function renderUpcoming() {
     }
     updateBtnState();
   });
+}
+
+async function bootstrapHomePage() {
+  if (!document.getElementById('weeklyList')) return;
+
+  try {
+    if (typeof initGlobalUi === 'function') initGlobalUi();
+    if (typeof initHeader === 'function') initHeader();
+    if (typeof initHero === 'function') await initHero();
+    await initHome();
+  } catch (error) {
+    console.error('Anasayfa yüklenirken hata:', error);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapHomePage);
+} else {
+  bootstrapHomePage();
 }
