@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 import './home.js'; 
+=======
+import { initHeader } from './header.js';
+import { initHome } from './home.js';
+import { initHero } from './hero.js';
+import './footer.js';
+import './modal.js';
+>>>>>>> dcd7918739c720638fbf4b6848a98de25c988bb6
 
 export function initGlobalUi() {
   const themeBtn =
@@ -11,6 +19,7 @@ export function initGlobalUi() {
   }
 }
 
+<<<<<<< HEAD
 export function openMovieModal(movie) {
   const overlay = document.getElementById('movie-spotlight-overlay');
   const content = document.getElementById('spotlightContent');
@@ -53,3 +62,14 @@ export function openMovieModal(movie) {
     }
   };
 }
+=======
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapPage, { once: true });
+} else {
+  bootstrapPage();
+}
+// movie-card.js dosyasındaki import hatasını çözen export:
+export function openMovieModal(movie) {
+  console.log('Modal açılıyor:', movie);
+}
+>>>>>>> dcd7918739c720638fbf4b6848a98de25c988bb6
