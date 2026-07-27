@@ -108,4 +108,4 @@ import{a as M}from"./vendor-Bie5rgBU.js";(function(){const t=document.createElem
       </div>
     </div>
   `,C(e.id)}function C(e){const t=document.getElementById("hero");if(!t||!e)return;const o=t.querySelector(".btn--primary"),i=t.querySelector(".btn--secondary");o==null||o.addEventListener("click",()=>{showMovieTrailerSpotlight(e)}),i==null||i.addEventListener("click",()=>{showMovieSpotlight(e)})}export{ue as a,x as b,me as c,he as d,ve as e,se as g,ge as i,pe as s};
-//# sourceMappingURL=hero-CV5YAE4K.js.map
+//# sourceMappingURL=hero-CA2SejuT.js.map
